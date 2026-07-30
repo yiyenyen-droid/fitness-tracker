@@ -73,14 +73,15 @@ function initExercisePicker() {
 
   groupSelect.addEventListener('change', () => {
     populateExerciseSelect(exerciseSelect, groupSelect.value);
-    selectExercise(exerciseSelect.value);
+    selectExercise(exerciseSelect.value, true);
   });
-  exerciseSelect.addEventListener('change', () => selectExercise(exerciseSelect.value));
+  exerciseSelect.addEventListener('change', () => selectExercise(exerciseSelect.value, true));
 
-  if (exerciseSelect.value) selectExercise(exerciseSelect.value);
+  if (exerciseSelect.value) selectExercise(exerciseSelect.value, false);
 }
 
-function selectExercise(id) {
+// autoStartRest: 使用者手動切換動作時（表示要換下一個動作了）自動開始組間／動作間的休息倒數
+function selectExercise(id, autoStartRest) {
   if (!id) return;
   state.selectedExerciseId = id;
   state.selectedRir = null;
@@ -98,6 +99,8 @@ function selectExercise(id) {
   clearRirSelection();
   $('#weightInput').value = '';
   $('#repsInput').value = '';
+
+  if (autoStartRest) startTimer();
 }
 
 function renderLastSessionRef(ex) {
