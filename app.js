@@ -354,23 +354,33 @@ function unlockAudio() {
 }
 
 function playBeep() {
-  try {
-    if (!state.audioCtx) unlockAudio();
-    const ctx = state.audioCtx;
-    if (!ctx) return;
-    if (ctx.state === 'suspended') ctx.resume();
-    [880, 1046].forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.frequency.value = freq;
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      gain.gain.setValueAtTime(0.2, ctx.currentTime + i * 0.28);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.28 + 0.25);
-      osc.start(ctx.currentTime + i * 0.28);
-      osc.stop(ctx.currentTime + i * 0.28 + 0.26);
-    });
-  } catch (e) { /* 忽略播放失敗 */ }
+  if (!state.audioCtx) unlockAudio();
+  const ctx = state.audioCtx;
+  if (!ctx) return;
+
+  const fire = () => {
+    try {
+      [880, 1046].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.value = freq;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        gain.gain.setValueAtTime(0.2, ctx.currentTime + i * 0.28);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.28 + 0.25);
+        osc.start(ctx.currentTime + i * 0.28);
+        osc.stop(ctx.currentTime + i * 0.28 + 0.26);
+      });
+    } catch (e) { /* 忽略播放失敗 */ }
+  };
+
+  // 休息時間通常有1-3分鐘完全沒有聲音，瀏覽器會自動把閒置的音效引擎「睡眠」掉，
+  // 一定要等 resume() 真的完成後才能排音效，不然音效會排在「還沒睡醒」的時間點，直接被吃掉、沒有聲音。
+  if (ctx.state === 'suspended') {
+    ctx.resume().then(fire).catch(() => {});
+  } else {
+    fire();
+  }
 }
 
 function initTimerControls() {
