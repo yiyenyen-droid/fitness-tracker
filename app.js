@@ -432,27 +432,51 @@ function renderSuggestions() {
 
 // ---------- History ----------
 function initHistoryTab() {
-  const sel = $('#historyExerciseSelect');
-  populateExerciseSelect(sel, null);
-  sel.addEventListener('change', renderHistory);
+  const groupSel = $('#historyGroupSelect');
+  const exSel = $('#historyExerciseSelect');
+  populateGroupSelect(groupSel, false);
+  groupSel.value = 'chest';
+  populateExerciseSelect(exSel, groupSel.value);
+
+  groupSel.addEventListener('change', () => {
+    populateExerciseSelect(exSel, groupSel.value);
+    renderHistory();
+  });
+  exSel.addEventListener('change', renderHistory);
 }
 
 function renderHistory() {
-  const sel = $('#historyExerciseSelect');
-  if (!sel.value) {
-    populateExerciseSelect(sel, null);
-  }
-  const exId = sel.value;
+  const exId = $('#historyExerciseSelect').value;
+  const lastWeightEl = $('#historyLastWeight');
   const list = $('#historyList');
+
   if (!exId) {
+    lastWeightEl.innerHTML = '';
     list.innerHTML = '<div class="empty-hint">請選擇一個動作</div>';
     return;
   }
+
+  const ex = getExerciseById(exId);
   const sessions = Storage.getSessionsForExercise(exId);
+
   if (!sessions.length) {
+    lastWeightEl.innerHTML = `
+      <div class="last-weight-title">${ex.name}</div>
+      <div class="last-weight-empty">尚無歷史紀錄，練過一次之後這裡就會顯示上次重量</div>
+    `;
     list.innerHTML = '<div class="empty-hint">尚無歷史紀錄</div>';
     return;
   }
+
+  const last = sessions[0];
+  const topSet = last.sets.reduce((a, b) => (b.weight > a.weight ? b : a));
+  lastWeightEl.innerHTML = `
+    <div class="last-weight-title">${ex.name}　<span class="tag">${last.date}</span></div>
+    <div class="last-weight-value">${fmtNum(topSet.weight)}<span class="last-weight-unit">kg</span></div>
+    <div class="last-weight-detail">${topSet.reps} 下・RIR ${topSet.rir >= 4 ? '≥4' : topSet.rir}</div>
+    <div class="last-weight-allsets">全部組數：${last.sets.map(s => `${fmtNum(s.weight)}kg×${s.reps}(RIR${s.rir >= 4 ? '≥4' : s.rir})`).join('、')}</div>
+  `;
+
   list.innerHTML = sessions.map(sess => `
     <div class="history-session">
       <div class="history-session-date">${sess.date}</div>
@@ -483,7 +507,8 @@ function initCustomExerciseModal() {
     populateExerciseSelect($('#exerciseSelect'), group);
     $('#exerciseSelect').value = ex.id;
     selectExercise(ex.id);
-    populateExerciseSelect($('#historyExerciseSelect'), null);
+    $('#historyGroupSelect').value = group;
+    populateExerciseSelect($('#historyExerciseSelect'), group);
   });
 }
 

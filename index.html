@@ -109,10 +109,17 @@
     <!-- 歷史紀錄 -->
     <section id="tab-history" class="tab-panel">
       <div class="card">
-        <label class="field-label">選擇動作查看歷史</label>
-        <select id="historyExerciseSelect"></select>
+        <label class="field-label">選擇部位與動作查看上次重量</label>
+        <div class="picker-row">
+          <select id="historyGroupSelect"></select>
+          <select id="historyExerciseSelect"></select>
+        </div>
       </div>
-      <div id="historyList" class="history-list"></div>
+      <div id="historyLastWeight" class="last-weight-card"></div>
+      <div class="card">
+        <h3>完整歷史紀錄</h3>
+        <div id="historyList" class="history-list"></div>
+      </div>
     </section>
   </main>
 
