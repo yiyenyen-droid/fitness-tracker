@@ -6,6 +6,7 @@ const state = {
   editingSetId: null,
   editingRir: null,
   editingOnSaved: null,
+  audioCtx: null,
   timer: { remaining: 0, total: 0, running: false, intervalId: null },
 };
 
@@ -342,9 +343,22 @@ function onTimerDone() {
   if (navigator.vibrate) navigator.vibrate([300, 100, 300]);
 }
 
+// 手機瀏覽器（尤其 iPhone Safari）規定音效一定要在「使用者親自點擊」的當下才能解鎖，
+// 倒數結束是計時器自動觸發、不算使用者點擊，所以要在使用者第一次點擊畫面時就先把音效引擎解鎖，
+// 之後倒數結束才能真的播出聲音。
+function unlockAudio() {
+  if (state.audioCtx) return;
+  try {
+    state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  } catch (e) { /* 瀏覽器不支援 Web Audio，略過 */ }
+}
+
 function playBeep() {
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (!state.audioCtx) unlockAudio();
+    const ctx = state.audioCtx;
+    if (!ctx) return;
+    if (ctx.state === 'suspended') ctx.resume();
     [880, 1046].forEach((freq, i) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -356,7 +370,7 @@ function playBeep() {
       osc.start(ctx.currentTime + i * 0.28);
       osc.stop(ctx.currentTime + i * 0.28 + 0.26);
     });
-  } catch (e) { /* 部分瀏覽器需使用者互動才能播放音效，忽略錯誤 */ }
+  } catch (e) { /* 忽略播放失敗 */ }
 }
 
 function initTimerControls() {
@@ -481,6 +495,8 @@ function init() {
   initEditModal();
   renderSuggestions();
   renderTodayAll();
+
+  document.addEventListener('pointerdown', unlockAudio, { once: true });
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('service-worker.js').catch(() => {});
