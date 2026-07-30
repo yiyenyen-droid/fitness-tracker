@@ -170,6 +170,13 @@ select, input[type="text"], input[type="number"] {
   color: var(--text-dim);
 }
 
+.timer-hint {
+  margin-top: 8px;
+  font-size: 0.76rem;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
 .set-input-block { margin-top: 6px; }
 
 .input-row {
