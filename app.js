@@ -470,17 +470,28 @@ function renderHistory() {
 
   const last = sessions[0];
   const topSet = last.sets.reduce((a, b) => (b.weight > a.weight ? b : a));
+  const latestSet = last.sets[last.sets.length - 1];
   lastWeightEl.innerHTML = `
     <div class="last-weight-title">${ex.name}　<span class="tag">${last.date}</span></div>
-    <div class="last-weight-value">${fmtNum(topSet.weight)}<span class="last-weight-unit">kg</span></div>
-    <div class="last-weight-detail">${topSet.reps} 下・RIR ${topSet.rir >= 4 ? '≥4' : topSet.rir}</div>
+    <div class="last-weight-stats">
+      <div class="last-weight-stat">
+        <div class="last-weight-stat-label">當天最重一組</div>
+        <div class="last-weight-value">${fmtNum(topSet.weight)}<span class="last-weight-unit">kg</span></div>
+        <div class="last-weight-detail">${topSet.reps} 下・RIR ${topSet.rir >= 4 ? '≥4' : topSet.rir}</div>
+      </div>
+      <div class="last-weight-stat">
+        <div class="last-weight-stat-label">最近一次重量（最後一組）</div>
+        <div class="last-weight-value">${fmtNum(latestSet.weight)}<span class="last-weight-unit">kg</span></div>
+        <div class="last-weight-detail">${latestSet.reps} 下・RIR ${latestSet.rir >= 4 ? '≥4' : latestSet.rir}</div>
+      </div>
+    </div>
     <div class="last-weight-allsets">全部組數：${last.sets.map(s => `${fmtNum(s.weight)}kg×${s.reps}(RIR${s.rir >= 4 ? '≥4' : s.rir})`).join('、')}</div>
   `;
 
   list.innerHTML = sessions.map(sess => `
     <div class="history-session">
       <div class="history-session-date">${sess.date}</div>
-      <div class="sets-list">${renderSetsList(sess.sets, false)}</div>
+      <div class="sets-list">${renderSetsList(sess.sets, false, true)}</div>
     </div>
   `).join('');
 }

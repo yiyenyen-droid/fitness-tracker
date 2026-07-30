@@ -337,6 +337,25 @@ select, input[type="text"], input[type="number"] {
   font-size: 0.95rem;
   color: var(--text);
 }
+.last-weight-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+.last-weight-stat {
+  background: var(--card-bg-2);
+  border-radius: 12px;
+  padding: 12px 6px;
+}
+.last-weight-stat-label {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+.last-weight-stat .last-weight-value { font-size: 1.9rem; }
+.last-weight-stat .last-weight-unit { font-size: 0.9rem; }
+.last-weight-stat .last-weight-detail { font-size: 0.8rem; }
 .last-weight-allsets {
   margin-top: 10px;
   font-size: 0.78rem;
