@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#111827" />
+<title>健身紀錄</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="app">
+
+  <header class="app-header">
+    <h1>💪 健身紀錄</h1>
+    <div class="today-date" id="todayDate"></div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="log">今日訓練</button>
+    <button class="tab-btn" data-tab="history">歷史紀錄</button>
+  </nav>
+
+  <main>
+    <!-- 建議橫幅區 -->
+    <section id="suggestionsArea" class="suggestions-area"></section>
+
+    <!-- 今日訓練 -->
+    <section id="tab-log" class="tab-panel active">
+
+      <div class="card">
+        <label class="field-label">選擇動作</label>
+        <div class="picker-row">
+          <select id="groupSelect"></select>
+          <select id="exerciseSelect"></select>
+        </div>
+        <button id="addCustomBtn" class="link-btn">+ 新增自訂動作</button>
+      </div>
+
+      <div id="exercisePanel" class="card hidden">
+        <div class="exercise-panel-header">
+          <h2 id="currentExerciseName"></h2>
+          <span id="currentExerciseTag" class="tag"></span>
+        </div>
+        <div id="lastSessionRef" class="last-session-ref"></div>
+
+        <!-- 組間計時器 -->
+        <div class="timer-block">
+          <div class="timer-display" id="timerDisplay">02:00</div>
+          <div class="timer-controls">
+            <button id="timerMinus" class="btn-icon">－15s</button>
+            <button id="timerStartPause" class="btn-primary">開始</button>
+            <button id="timerReset" class="btn-icon">重置</button>
+            <button id="timerPlus" class="btn-icon">＋15s</button>
+          </div>
+          <div class="timer-default-row">
+            預設休息：<span id="restSecLabel"></span> 秒
+            <button id="editRestBtn" class="link-btn small">調整預設</button>
+          </div>
+        </div>
+
+        <!-- 輸入新的一組 -->
+        <div class="set-input-block">
+          <div class="input-row">
+            <label>重量 (kg)</label>
+            <div class="stepper">
+              <button class="stepper-btn" data-target="weight" data-delta="-2.5">－</button>
+              <input type="number" id="weightInput" inputmode="decimal" step="0.5" />
+              <button class="stepper-btn" data-target="weight" data-delta="2.5">＋</button>
+            </div>
+          </div>
+          <div class="input-row">
+            <label>次數</label>
+            <div class="stepper">
+              <button class="stepper-btn" data-target="reps" data-delta="-1">－</button>
+              <input type="number" id="repsInput" inputmode="numeric" step="1" />
+              <button class="stepper-btn" data-target="reps" data-delta="1">＋</button>
+            </div>
+          </div>
+          <div class="input-row rir-row">
+            <label>RIR（還能做幾下）</label>
+            <div class="rir-options" id="rirOptions">
+              <button class="rir-btn" data-rir="0">0<span>力竭</span></button>
+              <button class="rir-btn" data-rir="1">1<span>勉強</span></button>
+              <button class="rir-btn" data-rir="2">2<span>吃力</span></button>
+              <button class="rir-btn" data-rir="3">3<span>有餘力</span></button>
+              <button class="rir-btn" data-rir="4">≥4<span>偏輕</span></button>
+            </div>
+          </div>
+          <button id="saveSetBtn" class="btn-primary full-width">紀錄這一組</button>
+        </div>
+
+        <!-- 今日已記錄組數 -->
+        <div class="today-sets">
+          <h3>今天已完成</h3>
+          <div id="todaySetsList" class="sets-list"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>今日訓練總覽</h3>
+        <div id="todayAllList" class="sets-list"></div>
+      </div>
+    </section>
+
+    <!-- 歷史紀錄 -->
+    <section id="tab-history" class="tab-panel">
+      <div class="card">
+        <label class="field-label">選擇動作查看歷史</label>
+        <select id="historyExerciseSelect"></select>
+      </div>
+      <div id="historyList" class="history-list"></div>
+    </section>
+  </main>
+
+</div>
+
+<!-- 新增自訂動作 modal -->
+<div id="customExerciseModal" class="modal hidden">
+  <div class="modal-content">
+    <h3>新增自訂動作</h3>
+    <label class="field-label">動作名稱</label>
+    <input type="text" id="customExName" placeholder="例如：史密斯機臥推" />
+    <label class="field-label">肌群</label>
+    <select id="customExGroup"></select>
+    <label class="field-label">動作類型</label>
+    <select id="customExType">
+      <option value="compound">複合動作（多關節）</option>
+      <option value="isolation">孤立動作（單關節）</option>
+    </select>
+    <div class="modal-actions">
+      <button id="customExCancel" class="btn-icon">取消</button>
+      <button id="customExSave" class="btn-primary">新增</button>
+    </div>
+  </div>
+</div>
+
+<script src="exercises.js"></script>
+<script src="storage.js"></script>
+<script src="suggestions.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
