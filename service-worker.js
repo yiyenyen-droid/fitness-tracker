@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fitness-tracker-v2';
+const CACHE_NAME = 'fitness-tracker-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -29,11 +29,12 @@ self.addEventListener('activate', (event) => {
 });
 
 // Network-first：只要能上網就永遠拿最新版本，只有離線時才退回快取版本。
-// 這樣之後更新程式碼，使用者下次打開（有網路）就會自動拿到新版，不用手動清除快取。
+// 這裡特別用 cache:'no-store' 直接跳過瀏覽器自己的 HTTP 快取，
+// 否則瀏覽器可能在我們的程式碼之外，自己偷偷回傳舊版檔案。
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request, { cache: 'no-store' })
       .then((response) => {
         const copy = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
