@@ -238,7 +238,7 @@ select, input[type="text"], input[type="number"] {
   padding: 8px 12px;
   font-size: 0.88rem;
 }
-.set-row .set-info { display: flex; gap: 10px; align-items: baseline; }
+.set-row .set-info { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
 .set-row .set-num { color: var(--text-dim); width: 20px; }
 .set-row .rir-pill {
   font-size: 0.7rem;
@@ -247,6 +247,15 @@ select, input[type="text"], input[type="number"] {
   background: var(--card-bg);
   border: 1px solid var(--border);
   color: var(--text-dim);
+}
+.set-row .ex-name-pill {
+  font-size: 0.7rem;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-weight: 600;
 }
 .set-row .del-btn {
   background: none;

@@ -171,7 +171,7 @@ function saveCurrentSet() {
 function renderTodaySetsForExercise(ex) {
   const today = new Date().toISOString().slice(0, 10);
   const sets = Storage.getSetsForExercise(ex.id).filter(s => s.date === today);
-  $('#todaySetsList').innerHTML = renderSetsList(sets, true);
+  $('#todaySetsList').innerHTML = renderSetsList(sets, true, true);
   bindDeleteButtons('#todaySetsList', () => {
     renderTodaySetsForExercise(ex);
     renderTodayAll();
@@ -179,11 +179,12 @@ function renderTodaySetsForExercise(ex) {
   });
 }
 
-function renderSetsList(sets, deletable) {
+function renderSetsList(sets, deletable, showExerciseName) {
   if (!sets.length) return '<div class="empty-hint">尚未紀錄</div>';
   return sets.map(s => `
     <div class="set-row" data-id="${s.id}">
       <div class="set-info">
+        ${showExerciseName ? `<span class="ex-name-pill">${getExerciseById(s.exerciseId)?.name || ''}</span>` : ''}
         <span class="set-num">#${s.setNumber}</span>
         <span>${fmtNum(s.weight)}kg × ${s.reps}</span>
         <span class="rir-pill">RIR ${s.rir >= 4 ? '≥4' : s.rir}</span>
