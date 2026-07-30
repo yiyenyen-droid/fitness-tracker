@@ -6,9 +6,14 @@ const state = {
   editingSetId: null,
   editingRir: null,
   editingOnSaved: null,
-  audioCtx: null,
+  beepAudioEl: null,
   timer: { remaining: 0, total: 0, running: false, intervalId: null },
 };
+
+// 短提示音（880Hz + 1046Hz 兩聲），用 <audio> 播放而不是 Web Audio API 現場合成，
+// 因為 iPhone「加到主畫面」開啟的 App（standalone 模式）對 Web Audio API 常常不給播音效，
+// 但用 <audio> 元素配合「使用者第一次點擊時先播一次」解鎖，相容性好很多。
+const BEEP_SOUND_SRC = 'beep.wav';
 
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
@@ -343,44 +348,33 @@ function onTimerDone() {
   if (navigator.vibrate) navigator.vibrate([300, 100, 300]);
 }
 
-// 手機瀏覽器（尤其 iPhone Safari）規定音效一定要在「使用者親自點擊」的當下才能解鎖，
-// 倒數結束是計時器自動觸發、不算使用者點擊，所以要在使用者第一次點擊畫面時就先把音效引擎解鎖，
-// 之後倒數結束才能真的播出聲音。
+// 手機瀏覽器（尤其 iPhone「加到主畫面」開的 App）規定音效一定要在「使用者親自點擊」的當下才能解鎖，
+// 倒數結束是計時器自動觸發、不算使用者點擊，所以要在使用者第一次點擊畫面時，
+// 就先把這個 <audio> 元素播一次（馬上暫停），之後才能用同一個元素真的播出聲音。
 function unlockAudio() {
-  if (state.audioCtx) return;
+  if (state.beepAudioEl) return;
   try {
-    state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  } catch (e) { /* 瀏覽器不支援 Web Audio，略過 */ }
+    const audio = new Audio(BEEP_SOUND_SRC);
+    audio.volume = 1;
+    const p = audio.play();
+    if (p && p.then) {
+      p.then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+      }).catch(() => {});
+    }
+    state.beepAudioEl = audio;
+  } catch (e) { /* 瀏覽器不支援，略過 */ }
 }
 
 function playBeep() {
-  if (!state.audioCtx) unlockAudio();
-  const ctx = state.audioCtx;
-  if (!ctx) return;
-
-  const fire = () => {
-    try {
-      [880, 1046].forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.frequency.value = freq;
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        gain.gain.setValueAtTime(0.2, ctx.currentTime + i * 0.28);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.28 + 0.25);
-        osc.start(ctx.currentTime + i * 0.28);
-        osc.stop(ctx.currentTime + i * 0.28 + 0.26);
-      });
-    } catch (e) { /* 忽略播放失敗 */ }
-  };
-
-  // 休息時間通常有1-3分鐘完全沒有聲音，瀏覽器會自動把閒置的音效引擎「睡眠」掉，
-  // 一定要等 resume() 真的完成後才能排音效，不然音效會排在「還沒睡醒」的時間點，直接被吃掉、沒有聲音。
-  if (ctx.state === 'suspended') {
-    ctx.resume().then(fire).catch(() => {});
-  } else {
-    fire();
-  }
+  if (!state.beepAudioEl) unlockAudio();
+  const audio = state.beepAudioEl;
+  if (!audio) return;
+  try {
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+  } catch (e) { /* 忽略播放失敗 */ }
 }
 
 function initTimerControls() {
