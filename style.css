@@ -264,12 +264,14 @@ select, input[type="text"], input[type="number"] {
   color: var(--accent);
   font-weight: 600;
 }
-.set-row .del-btn {
+.set-row .row-actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+.set-row .del-btn, .set-row .edit-btn {
   background: none;
   border: none;
   color: var(--text-dim);
   font-size: 1rem;
   cursor: pointer;
+  padding: 0;
 }
 .empty-hint { color: var(--text-dim); font-size: 0.85rem; padding: 6px 0; }
 

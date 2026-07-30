@@ -91,6 +91,15 @@ const Storage = {
     saveJSON(LS_KEYS.sets, sets);
   },
 
+  updateSet(id, { weight, reps, rir }) {
+    const sets = loadJSON(LS_KEYS.sets, []);
+    const idx = sets.findIndex(s => s.id === id);
+    if (idx === -1) return null;
+    sets[idx] = { ...sets[idx], weight, reps, rir };
+    saveJSON(LS_KEYS.sets, sets);
+    return sets[idx];
+  },
+
   getSetsForDate(date) {
     return this.getAllSets().filter(s => s.date === date);
   },

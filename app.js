@@ -3,6 +3,9 @@
 const state = {
   selectedExerciseId: null,
   selectedRir: null,
+  editingSetId: null,
+  editingRir: null,
+  editingOnSaved: null,
   timer: { remaining: 0, total: 0, running: false, intervalId: null },
 };
 
@@ -133,7 +136,7 @@ function initSetInput() {
     });
   });
 
-  $$('.rir-btn').forEach(btn => {
+  $$('#rirOptions .rir-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       state.selectedRir = parseInt(btn.dataset.rir, 10);
       clearRirSelection();
@@ -145,7 +148,7 @@ function initSetInput() {
 }
 
 function clearRirSelection() {
-  $$('.rir-btn').forEach(b => b.classList.remove('selected'));
+  $$('#rirOptions .rir-btn').forEach(b => b.classList.remove('selected'));
 }
 
 function saveCurrentSet() {
@@ -189,18 +192,71 @@ function renderSetsList(sets, deletable, showExerciseName) {
         <span>${fmtNum(s.weight)}kg × ${s.reps}</span>
         <span class="rir-pill">RIR ${s.rir >= 4 ? '≥4' : s.rir}</span>
       </div>
-      ${deletable ? `<button class="del-btn" data-id="${s.id}">✕</button>` : ''}
+      ${deletable ? `
+        <div class="row-actions">
+          <button class="edit-btn" data-id="${s.id}">✏️</button>
+          <button class="del-btn" data-id="${s.id}">✕</button>
+        </div>
+      ` : ''}
     </div>
   `).join('');
 }
 
-function bindDeleteButtons(containerSel, onDeleted) {
+function bindDeleteButtons(containerSel, onChanged) {
   $$(`${containerSel} .del-btn`).forEach(btn => {
     btn.addEventListener('click', () => {
       Storage.deleteSet(btn.dataset.id);
-      onDeleted();
+      onChanged();
     });
   });
+  $$(`${containerSel} .edit-btn`).forEach(btn => {
+    btn.addEventListener('click', () => openEditModal(btn.dataset.id, onChanged));
+  });
+}
+
+// ---------- Edit set modal ----------
+function initEditModal() {
+  const modal = $('#editSetModal');
+  $$('#editRirOptions .rir-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.editingRir = parseInt(btn.dataset.rir, 10);
+      $$('#editRirOptions .rir-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+  });
+  $('#editSetCancel').addEventListener('click', () => modal.classList.add('hidden'));
+  $('#editSetSave').addEventListener('click', saveEditedSet);
+}
+
+function openEditModal(id, onSaved) {
+  const set = Storage.getAllSets().find(s => s.id === id);
+  if (!set) return;
+  state.editingSetId = id;
+  state.editingRir = set.rir;
+  state.editingOnSaved = onSaved;
+  $('#editWeightInput').value = set.weight;
+  $('#editRepsInput').value = set.reps;
+  $$('#editRirOptions .rir-btn').forEach(b => {
+    b.classList.toggle('selected', parseInt(b.dataset.rir, 10) === set.rir);
+  });
+  $('#editSetModal').classList.remove('hidden');
+}
+
+function saveEditedSet() {
+  const weight = parseFloat($('#editWeightInput').value);
+  const reps = parseInt($('#editRepsInput').value, 10);
+  const rir = state.editingRir;
+
+  if (isNaN(weight) || weight < 0) return alert('請輸入重量');
+  if (isNaN(reps) || reps <= 0) return alert('請輸入次數');
+  if (rir === null || rir === undefined) return alert('請選擇 RIR（還能做幾下）');
+
+  Storage.updateSet(state.editingSetId, { weight, reps, rir });
+  $('#editSetModal').classList.add('hidden');
+
+  if (state.editingOnSaved) state.editingOnSaved();
+  renderTodayAll();
+  renderSuggestions();
 }
 
 function renderTodayAll() {
@@ -422,6 +478,7 @@ function init() {
   initTimerControls();
   initHistoryTab();
   initCustomExerciseModal();
+  initEditModal();
   renderSuggestions();
   renderTodayAll();
 

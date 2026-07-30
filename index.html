@@ -138,6 +138,29 @@
   </div>
 </div>
 
+<!-- 編輯這一組 modal -->
+<div id="editSetModal" class="modal hidden">
+  <div class="modal-content">
+    <h3>編輯這一組</h3>
+    <label class="field-label">重量 (kg)</label>
+    <input type="number" id="editWeightInput" inputmode="decimal" step="0.5" />
+    <label class="field-label">次數</label>
+    <input type="number" id="editRepsInput" inputmode="numeric" step="1" />
+    <label class="field-label">RIR（還能做幾下）</label>
+    <div class="rir-options" id="editRirOptions">
+      <button class="rir-btn" data-rir="0">0<span>力竭</span></button>
+      <button class="rir-btn" data-rir="1">1<span>勉強</span></button>
+      <button class="rir-btn" data-rir="2">2<span>吃力</span></button>
+      <button class="rir-btn" data-rir="3">3<span>有餘力</span></button>
+      <button class="rir-btn" data-rir="4">≥4<span>偏輕</span></button>
+    </div>
+    <div class="modal-actions">
+      <button id="editSetCancel" class="btn-icon">取消</button>
+      <button id="editSetSave" class="btn-primary">儲存</button>
+    </div>
+  </div>
+</div>
+
 <script src="exercises.js"></script>
 <script src="storage.js"></script>
 <script src="suggestions.js"></script>
